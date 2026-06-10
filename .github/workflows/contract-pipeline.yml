@@ -1,0 +1,77 @@
+name: "🔵 Contract Pipeline — Lint + Mock"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "contract/**"
+      - ".github/workflows/contract-pipeline.yml"
+  workflow_dispatch:
+
+env:
+  SUFFIX: ${{ vars.SUFFIX }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Job 1: Lint with Spectral ──
+  lint:
+    name: "🔍 Spectral Lint"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Run Spectral Lint
+        run: spectral lint contract/openapi.yaml --ruleset contract/.spectral.yml
+
+  # ── Job 2: Deploy Mock ──
+  deploy-mock:
+    name: "🚀 Deploy Mock"
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy Mock to API Gateway
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          chmod +x scripts/01-deploy-mock.sh
+          bash scripts/01-deploy-mock.sh
+
+      - name: Smoke Test (Mock)
+        run: |
+          echo "📌 Testing mock endpoint..."
+          ENDPOINT="https://${API_ID}.execute-api.${{ secrets.AWS_REGION }}.amazonaws.com/test/clientes/CLI001/cuentas"
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$ENDPOINT")
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" != "200" ]; then
+            echo "❌ Smoke test failed!"
+            exit 1
+          fi
+          echo "✅ Smoke test passed!"
+
+      - name: Update Catalog
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CATALOG_BUCKET: ${{ secrets.CATALOG_BUCKET }}
+          STATUS: "MOCK"
+        run: |
+          chmod +x scripts/05-update-catalog.sh
+          bash scripts/05-update-catalog.sh

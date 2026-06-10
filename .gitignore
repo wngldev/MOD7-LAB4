@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Swagger UI dist (downloaded at deploy time)
+api-catalog/frontend/swagger-ui/swagger-ui-bundle.js
+api-catalog/frontend/swagger-ui/swagger-ui-standalone-preset.js
+api-catalog/frontend/swagger-ui/swagger-ui.css
+
+# Generated files
+api-catalog/frontend/manifest.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Lambda zip
+*.zip

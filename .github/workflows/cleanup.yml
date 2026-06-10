@@ -1,0 +1,35 @@
+name: "🔴 Cleanup Resources"
+
+on:
+  workflow_dispatch:
+
+env:
+  SUFFIX: ${{ vars.SUFFIX }}
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    name: "🧹 Cleanup"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Cleanup All Resources
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CATALOG_BUCKET: ${{ secrets.CATALOG_BUCKET }}
+        run: |
+          chmod +x scripts/99-cleanup.sh
+          bash scripts/99-cleanup.sh

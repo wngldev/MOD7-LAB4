@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📋 API Catalog — Sesión 4</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📋 API Catalog</h1>
+      <p class="subtitle">Gobernanza de APIs en Entornos Multi-nube — Sesión 4</p>
+      <div class="stats" id="stats"></div>
+    </header>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Todas</button>
+      <button class="filter-btn" data-filter="MOCK">🟡 Mock</button>
+      <button class="filter-btn" data-filter="IMPLEMENTADO">🔵 Implementado</button>
+      <button class="filter-btn" data-filter="PRODUCCION">🟢 Producción</button>
+    </div>
+
+    <table id="catalog-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>API</th>
+          <th>Estado</th>
+          <th>Versión</th>
+          <th>Nube</th>
+          <th>🔐</th>
+          <th>Última Actualización</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="catalog-body">
+        <tr>
+          <td colspan="8" class="loading">Cargando APIs...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer>
+      <p>UTEC Posgrado · Diseño y Consumo de APIs · Instructor: Miguel Leyva</p>
+    </footer>
+  </div>
+
+  <script src="assets/catalog.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📖 API Explorer</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="swagger-ui/swagger-ui.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="back-link">← Volver al Catálogo</a>
+      <h1 id="api-name">Cargando...</h1>
+      <div class="api-info" id="api-info"></div>
+    </header>
+
+    <div id="swagger-container"></div>
+
+    <footer>
+      <p>UTEC Posgrado · Diseño y Consumo de APIs · Instructor: Miguel Leyva</p>
+    </footer>
+  </div>
+
+  <script src="swagger-ui/swagger-ui-bundle.js"></script>
+  <script src="swagger-ui/swagger-ui-standalone-preset.js"></script>
+  <script src="assets/explorer.js"></script>
+</body>
+</html>

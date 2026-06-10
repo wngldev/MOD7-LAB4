@@ -1,0 +1,67 @@
+name: "🟠 Promote to Production"
+
+on:
+  workflow_dispatch:
+
+env:
+  SUFFIX: ${{ vars.SUFFIX }}
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    name: "🚀 Promote to Prod"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Promote to Production
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          chmod +x scripts/04-promote-prod.sh
+          bash scripts/04-promote-prod.sh
+
+      - name: Smoke Test (Prod with API Key)
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SUFFIX: ${{ env.SUFFIX }}
+        run: |
+          ENDPOINT="${PROD_ENDPOINT}/clientes/CLI001/cuentas"
+
+          echo "📌 Test WITHOUT API Key (should be 403)..."
+          STATUS_NO_KEY=$(curl -s -o /dev/null -w "%{http_code}" "$ENDPOINT")
+          echo "Status without key: $STATUS_NO_KEY"
+          if [ "$STATUS_NO_KEY" != "403" ]; then
+            echo "⚠️  Expected 403 without API Key, got $STATUS_NO_KEY"
+          fi
+
+          echo "📌 Test WITH API Key (should be 200)..."
+          STATUS_WITH_KEY=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-key: ${API_KEY_VALUE}" "$ENDPOINT")
+          echo "Status with key: $STATUS_WITH_KEY"
+          if [ "$STATUS_WITH_KEY" != "200" ]; then
+            echo "❌ Smoke test failed! Status: $STATUS_WITH_KEY"
+            exit 1
+          fi
+          echo "✅ Production smoke test passed!"
+
+      - name: Update Catalog
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CATALOG_BUCKET: ${{ secrets.CATALOG_BUCKET }}
+          STATUS: "PRODUCCION"
+        run: |
+          chmod +x scripts/05-update-catalog.sh
+          bash scripts/05-update-catalog.sh

@@ -1,0 +1,79 @@
+name: "🟢 Implementation Pipeline — Lambda + Test"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "implementation/**"
+      - ".github/workflows/implementation-pipeline.yml"
+  workflow_dispatch:
+
+env:
+  SUFFIX: ${{ vars.SUFFIX }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Job 1: Deploy Lambda ──
+  deploy-lambda:
+    name: "📦 Deploy Lambda"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy Lambda + Version + Alias test
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          LAMBDA_ROLE_ARN: ${{ secrets.LAMBDA_ROLE_ARN }}
+        run: |
+          chmod +x scripts/02-deploy-lambda-test.sh
+          bash scripts/02-deploy-lambda-test.sh
+
+      - name: Update API Gateway Integration
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          chmod +x scripts/03-update-api-integration.sh
+          bash scripts/03-update-api-integration.sh
+
+      - name: Smoke Test (Lambda)
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SUFFIX: ${{ env.SUFFIX }}
+        run: |
+          API_NAME="cuentas-api-${SUFFIX}"
+          API_ID=$(aws apigateway get-rest-apis --limit 500 --query "items[?name=='${API_NAME}'].id" --output text --no-cli-pager)
+          ENDPOINT="https://${API_ID}.execute-api.${AWS_REGION}.amazonaws.com/test/clientes/CLI001/cuentas"
+          echo "📌 Testing: $ENDPOINT"
+          RESPONSE=$(curl -s "$ENDPOINT")
+          echo "Response: $RESPONSE"
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ENDPOINT")
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "❌ Smoke test failed! Status: $STATUS_CODE"
+            exit 1
+          fi
+          echo "✅ Smoke test passed!"
+
+      - name: Update Catalog
+        env:
+          SUFFIX: ${{ env.SUFFIX }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          CATALOG_BUCKET: ${{ secrets.CATALOG_BUCKET }}
+          STATUS: "IMPLEMENTADO"
+        run: |
+          API_NAME="cuentas-api-${SUFFIX}"
+          export API_ID=$(aws apigateway get-rest-apis --limit 500 --query "items[?name=='${API_NAME}'].id" --output text --no-cli-pager)
+          chmod +x scripts/05-update-catalog.sh
+          bash scripts/05-update-catalog.sh

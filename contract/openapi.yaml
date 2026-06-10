@@ -1,0 +1,221 @@
+openapi: "3.0.3"
+info:
+  title: "Cuentas Bancarias API"
+  # --- FASE 1: GOBERNANZA DEL CONTRATO (ERROR INTENCIONAL 1) ---
+  version: "" #  ERROR: La versión no debe estar vacía. ACCIÓN: Cambia a "1.0.0"
+  description: |
+    API para gestionar cuentas bancarias de clientes.
+    Permite consultar las cuentas asociadas a un cliente.
+  contact:
+    name: "Equipo de APIs"
+    email: "apis@banco.com"
+
+tags:
+  - name: Cuentas
+    description: "Operaciones relacionadas con cuentas bancarias"
+
+servers:
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/{stage}
+    description: "API Gateway Endpoint"
+    variables:
+      apiId:
+        default: "xxx"
+      region:
+        default: "us-east-1"
+      stage:
+        default: "test"
+
+paths:
+  /clientes/{cliente-id}/cuentas:
+    get:
+      summary: "Obtener cuentas bancarias de un cliente"
+      description: "Retorna una lista de todas las cuentas bancarias asociadas al ID del cliente proporcionado."
+      
+      # --- FASE 1: GOBERNANZA DEL CONTRATO (ERROR INTENCIONAL 2) ---
+      # operationId: listarCuentasCliente # ❌ ERROR: Falta el operationId. ACCIÓN: Descomenta esta línea
+      
+      tags:
+        - Cuentas
+      parameters:
+        - name: cliente-id
+          in: path
+          required: true
+          description: "Identificador único del cliente"
+          schema:
+            type: string
+            example: "CLI001"
+      responses:
+        "200":
+          description: "Lista de cuentas bancarias del cliente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CuentasResponse"
+              example:
+                clienteId: "CLI001"
+                cuentas:
+                  - numeroCuenta: "1234567890"
+                    tipo: "AHORROS"
+                    moneda: "PEN"
+                    titular: "Juan Pérez"
+                    saldo: 5000.00
+                  - numeroCuenta: "0987654321"
+                    tipo: "CORRIENTE"
+                    moneda: "USD"
+                    titular: "Juan Pérez"
+                    saldo: 1200.50
+        "404":
+          description: "Cliente no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-amazon-apigateway-integration:
+        type: MOCK
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: |
+                {
+                  "clienteId": "$input.params('cliente-id')",
+                  "cuentas": [
+                    {
+                      "numeroCuenta": "1234567890",
+                      "tipo": "AHORROS",
+                      "moneda": "PEN",
+                      "titular": "Juan Pérez (Mock)",
+                      "saldo": 5000.00
+                    },
+                    {
+                      "numeroCuenta": "0987654321",
+                      "tipo": "CORRIENTE",
+                      "moneda": "USD",
+                      "titular": "Juan Pérez (Mock)",
+                      "saldo": 1200.50
+                    }
+                  ]
+                }
+        passthroughBehavior: "when_no_match"
+
+    # --- SOLO PARA LABORATORIO PROPUESTO: DESCOMENTAR PARA PUBLICAR EL MOCK ---
+    # post:
+    #   summary: "Crear una nueva cuenta para el cliente"
+    #   description: "Crea una cuenta bancaria asociada al ID del cliente proporcionado."
+    #   operationId: crearCuentaCliente
+    #   tags:
+    #     - Cuentas
+    #   parameters:
+    #     - name: cliente-id
+    #       in: path
+    #       required: true
+    #       description: "Identificador único del cliente"
+    #       schema:
+    #         type: string
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           type: object
+    #           properties:
+    #             tipo:
+    #               type: string
+    #               enum: [AHORROS, CORRIENTE]
+    #             moneda:
+    #               type: string
+    #               enum: [PEN, USD]
+    #             titular:
+    #               type: string
+    #   responses:
+    #     "201":
+    #       description: "Cuenta creada exitosamente"
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: "#/components/schemas/Cuenta"
+    #     "400":
+    #       description: "Error de validación"
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: "#/components/schemas/Error"
+    #   x-amazon-apigateway-integration:
+    #     type: MOCK
+    #     requestTemplates:
+    #       application/json: |
+    #         {
+    #           "statusCode": 201
+    #         }
+    #     responses:
+    #       default:
+    #         statusCode: "201"
+    #         responseTemplates:
+    #           application/json: |
+    #             {
+    #               "numeroCuenta": "9999888877",
+    #               "tipo": "AHORROS",
+    #               "moneda": "PEN",
+    #               "titular": "Juan Pérez (Mock POST)",
+    #               "saldo": 0.00
+    #             }
+
+components:
+  schemas:
+    CuentasResponse:
+      type: object
+      properties:
+        clienteId:
+          type: string
+          description: "Identificador del cliente"
+        cuentas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Cuenta"
+    
+    Cuenta:
+      type: object
+      properties:
+        numeroCuenta:
+          type: string
+          description: "Número de cuenta bancaria"
+        tipo:
+          type: string
+          enum: [AHORROS, CORRIENTE]
+          description: "Tipo de cuenta"
+        moneda:
+          type: string
+          enum: [PEN, USD]
+          description: "Moneda de la cuenta"
+        titular:
+          type: string
+          description: "Nombre del titular"
+        saldo:
+          type: number
+          format: double
+          description: "Saldo actual de la cuenta"
+    
+    Error:
+      type: object
+      description: "Error response siguiendo RFC 7807"
+      properties:
+        type:
+          type: string
+          description: "URI de referencia del tipo de error"
+        title:
+          type: string
+          description: "Título corto del error"
+        status:
+          type: integer
+          description: "Código de estado HTTP"
+        detail:
+          type: string
+          description: "Descripción detallada del error"
+        instance:
+          type: string
+          description: "URI de la instancia del error"

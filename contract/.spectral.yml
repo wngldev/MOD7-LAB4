@@ -1,0 +1,57 @@
+extends:
+  - ["spectral:oas", "recommended"]
+
+rules:
+  # Rule 1: API version must not be empty
+  api-version-non-empty:
+    description: 'Info "version" must not be empty.'
+    severity: error
+    given: "$.info"
+    then:
+      field: version
+      function: truthy
+
+  # Rule 2: Paths must use kebab-case (lowercase + hyphens)
+  paths-kebab-case:
+    description: "Paths must use kebab-case (lowercase with hyphens, no camelCase)."
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        match: '^(/[a-z0-9{}-]+)+$'
+
+  # Rule 3: Every operation must have an operationId
+  operation-id-required:
+    description: 'Each operation must have an "operationId".'
+    severity: error
+    given: "$.paths[*][get,post,put,delete,patch]"
+    then:
+      field: operationId
+      function: truthy
+
+  # Rule 4: Every response must have a description
+  response-description-required:
+    description: 'Each response must have a "description".'
+    severity: error
+    given: "$.paths[*][*].responses[*]"
+    then:
+      field: description
+      function: truthy
+
+  # Additional governance rules (warnings)
+  info-contact:
+    description: "API must have contact information."
+    severity: warn
+    given: "$.info"
+    then:
+      field: contact
+      function: truthy
+
+  info-description:
+    description: "API must have a description."
+    severity: warn
+    given: "$.info"
+    then:
+      field: description
+      function: truthy

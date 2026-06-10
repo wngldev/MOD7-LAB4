@@ -1,0 +1,31 @@
+{
+  "suffix": "XX",
+  "apiName": "cuentas-api-XX",
+  "status": "⚪ PENDIENTE",
+  "statusCode": "PENDIENTE",
+  "version": "",
+  "cloud": "AWS",
+  "cloudIcon": "☁️",
+  "region": "us-east-1",
+  "services": {
+    "gateway": "Amazon API Gateway",
+    "compute": "AWS Lambda",
+    "catalog": "Amazon S3"
+  },
+  "stages": {
+    "test": null,
+    "prod": null
+  },
+  "apiKeyRequired": false,
+  "timestamps": {
+    "lastUpdated": null,
+    "mockDeployedAt": null,
+    "lambdaDeployedAt": null,
+    "promotedToProdAt": null
+  },
+  "pipeline": {
+    "provider": "GitHub Actions",
+    "repository": "",
+    "runId": ""
+  }
+}
