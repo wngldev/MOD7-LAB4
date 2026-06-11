@@ -104,66 +104,66 @@ paths:
         passthroughBehavior: "when_no_match"
 
     # --- SOLO PARA LABORATORIO PROPUESTO: DESCOMENTAR PARA PUBLICAR EL MOCK ---
-    # post:
-    #   summary: "Crear una nueva cuenta para el cliente"
-    #   description: "Crea una cuenta bancaria asociada al ID del cliente proporcionado."
-    #   operationId: crearCuentaCliente
-    #   tags:
-    #     - Cuentas
-    #   parameters:
-    #     - name: cliente-id
-    #       in: path
-    #       required: true
-    #       description: "Identificador único del cliente"
-    #       schema:
-    #         type: string
-    #   requestBody:
-    #     required: true
-    #     content:
-    #       application/json:
-    #         schema:
-    #           type: object
-    #           properties:
-    #             tipo:
-    #               type: string
-    #               enum: [AHORROS, CORRIENTE]
-    #             moneda:
-    #               type: string
-    #               enum: [PEN, USD]
-    #             titular:
-    #               type: string
-    #   responses:
-    #     "201":
-    #       description: "Cuenta creada exitosamente"
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/Cuenta"
-    #     "400":
-    #       description: "Error de validación"
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/Error"
-    #   x-amazon-apigateway-integration:
-    #     type: MOCK
-    #     requestTemplates:
-    #       application/json: |
-    #         {
-    #           "statusCode": 201
-    #         }
-    #     responses:
-    #       default:
-    #         statusCode: "201"
-    #         responseTemplates:
-    #           application/json: |
-    #             {
-    #               "numeroCuenta": "9999888877",
-    #               "tipo": "AHORROS",
-    #               "moneda": "PEN",
-    #               "titular": "Juan Pérez (Mock POST)",
-    #               "saldo": 0.00
-    #             }
+    post:
+      summary: "Crear una nueva cuenta para el cliente"
+      description: "Crea una cuenta bancaria asociada al ID del cliente proporcionado."
+      operationId: crearCuentaCliente
+      tags:
+        - Cuentas
+      parameters:
+        - name: cliente-id
+          in: path
+          required: true
+          description: "Identificador único del cliente"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                  enum: [AHORROS, CORRIENTE]
+                moneda:
+                  type: string
+                  enum: [PEN, USD]
+                titular:
+                  type: string
+      responses:
+        "201":
+          description: "Cuenta creada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cuenta"
+        "400":
+          description: "Error de validación"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-amazon-apigateway-integration:
+        type: MOCK
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode": 201
+            }
+        responses:
+          default:
+            statusCode: "201"
+            responseTemplates:
+              application/json: |
+                {
+                  "numeroCuenta": "9999888877",
+                  "tipo": "AHORROS",
+                  "moneda": "PEN",
+                  "titular": "Juan Pérez (Mock POST)",
+                  "saldo": 0.00
+                }
 
 components:
   schemas:
