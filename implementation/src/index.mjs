@@ -48,7 +48,7 @@ export const handler = async (event) => {
           numeroCuenta: "0987654321",
           tipo: "CORRIENTE",
           moneda: "USD",
-          titular: "Juan Pérez",
+          titular: "Pieer Rodas",
           saldo: 1200.5,
         },
       ],
