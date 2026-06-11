@@ -1,7 +1,7 @@
 openapi: "3.0.3"
 info:
   title: "Cuentas Bancarias API"
-  # --- FASE 1: GOBERNANZA DEL CONTRATO (ERROR INTENCIONAL 1) ---
+  # --- FASE 1: GOBERNANZA DEL CONTRATO (ERROR INTENCIONAL 1a) ---
   version: "" #  ERROR: La versión no debe estar vacía. ACCIÓN: Cambia a "1.0.0"
   description: |
     API para gestionar cuentas bancarias de Clientes.
