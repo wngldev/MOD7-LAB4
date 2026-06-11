@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: "Cuentas Bancarias API"
   # --- FASE 1: GOBERNANZA DEL CONTRATO (ERROR INTENCIONAL 1a) ---
-  version: "" #  ERROR: La versión no debe estar vacía. ACCIÓN: Cambia a "1.0.0"
+  version: "1.0.0" #  ERROR: La versión no debe estar vacía. ACCIÓN: Cambia a "1.0.0"
   description: |
     API para gestionar cuentas bancarias de Clientes.
     Permite consultar las cuentas asociadas a un Cliente.
@@ -32,7 +32,7 @@ paths:
       description: "Retorna una lista de todas las cuentas bancarias asociadas al ID del cliente proporcionado."
       
       # --- FASE 1: GOBERNANZA DEL CONTRATO (ERROR INTENCIONAL 2) ---
-      # operationId: listarCuentasCliente # ❌ ERROR: Falta el operationId. ACCIÓN: Descomenta esta línea
+      operationId: listarCuentasCliente # ❌ ERROR: Falta el operationId. ACCIÓN: Descomenta esta línea
       
       tags:
         - Cuentas
